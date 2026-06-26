@@ -1,1 +1,4 @@
-FROM ghcr.io/its-me/workflow:latest
+FROM ghcr.io/its-me/workflow:base
+
+ARG COMMIT_SHA
+LABEL org.opencontainers.image.revision=$COMMIT_SHA

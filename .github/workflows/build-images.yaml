@@ -28,6 +28,7 @@ jobs:
           context: .
           file: Dockerfile.base
           push: true
+          build-args: COMMIT_SHA=${{ github.sha }}
           tags: ghcr.io/its-me/workflow:base
 
   build-successor:
@@ -54,4 +55,5 @@ jobs:
           context: .
           file: Dockerfile.successor
           push: true
+          build-args: COMMIT_SHA=${{ github.sha }}
           tags: ghcr.io/its-me/workflow:successor
