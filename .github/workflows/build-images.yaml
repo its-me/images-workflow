@@ -9,8 +9,8 @@ jobs:
     name: "GHCR: Build and push base"
     runs-on: ubuntu-latest
     environment:
-      name: base
-      url: https://ghcr.io/its-me/workflow:base
+      name: ghcr
+      url: https://ghcr.io/its-me/workflow
     permissions:
       contents: read
       packages: write
@@ -26,6 +26,7 @@ jobs:
       - uses: docker/build-push-action@v7
         with:
           context: .
+          file: Dockerfile.base
           push: true
           tags: ghcr.io/its-me/workflow:base
 
@@ -34,8 +35,8 @@ jobs:
     needs: build-base
     runs-on: ubuntu-latest
     environment:
-      name: successor
-      url: https://ghcr.io/its-me/workflow:successor
+      name: ghcr
+      url: https://ghcr.io/its-me/workflow
     permissions:
       contents: read
       packages: write
