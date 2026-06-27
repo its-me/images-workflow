@@ -38,6 +38,83 @@ jobs:
             --tag ghcr.io/its-me/workflow:base-${GITHUB_REF_NAME#v} \
             ghcr.io/its-me/workflow:base
 
+  push-base-hub:
+    name: "Docker Hub: Publish base"
+    needs: build-base
+    runs-on: ubuntu-latest
+    environment:
+      name: Docker Hub
+      url: https://hub.docker.com/r/${{ secrets.HUB_USERNAME }}/workflow
+    permissions:
+      packages: read
+    env:
+      REPOSITORY: workflow
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.HUB_USERNAME }}
+          password: ${{ secrets.HUB_TOKEN }}
+
+      - name: Publish base
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:base \
+            ghcr.io/its-me/workflow:base
+
+      - name: Tag semver
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:base-${GITHUB_REF_NAME#v} \
+            ghcr.io/its-me/workflow:base
+
+  push-base-quay:
+    name: "Quay: Publish base"
+    needs: build-base
+    runs-on: ubuntu-latest
+    environment:
+      name: Quay.io
+      url: https://quay.io/repository/${{ secrets.QUAY_USERNAME }}/workflow
+    permissions:
+      packages: read
+    env:
+      REPOSITORY: workflow
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v4
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Publish base
+        env:
+          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
+        run: |
+          docker buildx imagetools create \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:base \
+            ghcr.io/its-me/workflow:base
+
+      - name: Tag semver
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
+        run: |
+          docker buildx imagetools create \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:base-${GITHUB_REF_NAME#v} \
+            ghcr.io/its-me/workflow:base
+
   build-successor:
     name: "GHCR: Build and push successor"
     needs: build-base
@@ -70,4 +147,81 @@ jobs:
         run: |
           docker buildx imagetools create \
             --tag ghcr.io/its-me/workflow:successor-${GITHUB_REF_NAME#v} \
+            ghcr.io/its-me/workflow:successor
+
+  push-successor-hub:
+    name: "Docker Hub: Publish successor"
+    needs: build-successor
+    runs-on: ubuntu-latest
+    environment:
+      name: Docker Hub
+      url: https://hub.docker.com/r/${{ secrets.HUB_USERNAME }}/workflow
+    permissions:
+      packages: read
+    env:
+      REPOSITORY: workflow
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.HUB_USERNAME }}
+          password: ${{ secrets.HUB_TOKEN }}
+
+      - name: Publish successor
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:successor \
+            ghcr.io/its-me/workflow:successor
+
+      - name: Tag semver
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:successor-${GITHUB_REF_NAME#v} \
+            ghcr.io/its-me/workflow:successor
+
+  push-successor-quay:
+    name: "Quay: Publish successor"
+    needs: build-successor
+    runs-on: ubuntu-latest
+    environment:
+      name: Quay.io
+      url: https://quay.io/repository/${{ secrets.QUAY_USERNAME }}/workflow
+    permissions:
+      packages: read
+    env:
+      REPOSITORY: workflow
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v4
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Publish successor
+        env:
+          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
+        run: |
+          docker buildx imagetools create \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:successor \
+            ghcr.io/its-me/workflow:successor
+
+      - name: Tag semver
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
+        run: |
+          docker buildx imagetools create \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:successor-${GITHUB_REF_NAME#v} \
             ghcr.io/its-me/workflow:successor
