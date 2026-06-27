@@ -41,7 +41,7 @@ jobs:
   push-base-hub:
     name: "Docker Hub: Publish base"
     needs: build-base
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment:
       name: Docker Hub
       url: https://hub.docker.com/r/1tsme/workflow
@@ -77,7 +77,7 @@ jobs:
   push-base-quay:
     name: "Quay: Publish base"
     needs: build-base
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment:
       name: Quay.io
       url: https://quay.io/repository/itsme/workflow
@@ -152,7 +152,7 @@ jobs:
   push-successor-hub:
     name: "Docker Hub: Publish successor"
     needs: build-successor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment:
       name: Docker Hub
       url: https://hub.docker.com/r/1tsme/workflow
@@ -188,7 +188,7 @@ jobs:
   push-successor-quay:
     name: "Quay: Publish successor"
     needs: build-successor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment:
       name: Quay.io
       url: https://quay.io/repository/itsme/workflow
