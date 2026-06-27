@@ -14,6 +14,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      tags: ${{ steps.tags.outputs.list }}
     steps:
       - uses: actions/checkout@v7
 
@@ -23,13 +25,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare tags
+        id: tags
+        run: |
+          tags="base"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            tags="$tags base-${GITHUB_REF_NAME#v}"
+          fi
+          echo "list=$tags" >> $GITHUB_OUTPUT
+
       - uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile.base
           push: true
           build-args: COMMIT_SHA=${{ github.sha }}
-          tags: ghcr.io/its-me/workflow:base
+          tags: |
+            ghcr.io/its-me/workflow:base
 
       - name: Tag semver
         if: startsWith(github.ref, 'refs/tags/v')
@@ -61,18 +73,13 @@ jobs:
           username: ${{ secrets.HUB_USERNAME }}
           password: ${{ secrets.HUB_TOKEN }}
 
-      - name: Publish base
+      - name: Publish
         run: |
-          docker buildx imagetools create \
-            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:base \
-            ghcr.io/its-me/workflow:base
-
-      - name: Tag semver
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          docker buildx imagetools create \
-            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:base-${GITHUB_REF_NAME#v} \
-            ghcr.io/its-me/workflow:base
+          for tag in ${{ needs.build-base.outputs.tags }}; do
+            docker buildx imagetools create \
+              --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:$tag \
+              ghcr.io/its-me/workflow:$tag
+          done
 
   push-base-quay:
     name: "Quay: Publish base"
@@ -98,22 +105,15 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
-      - name: Publish base
+      - name: Publish
         env:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
-          docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:base \
-            ghcr.io/its-me/workflow:base
-
-      - name: Tag semver
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
-        run: |
-          docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:base-${GITHUB_REF_NAME#v} \
-            ghcr.io/its-me/workflow:base
+          for tag in ${{ needs.build-base.outputs.tags }}; do
+            docker buildx imagetools create \
+              --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:$tag \
+              ghcr.io/its-me/workflow:$tag
+          done
 
   build-successor:
     name: "GHCR: Build and push successor"
@@ -125,6 +125,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      tags: ${{ steps.tags.outputs.list }}
     steps:
       - uses: actions/checkout@v7
 
@@ -133,6 +135,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare tags
+        id: tags
+        run: |
+          tags="successor"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            tags="$tags successor-${GITHUB_REF_NAME#v}"
+          fi
+          echo "list=$tags" >> $GITHUB_OUTPUT
 
       - uses: docker/build-push-action@v7
         with:
@@ -172,18 +183,13 @@ jobs:
           username: ${{ secrets.HUB_USERNAME }}
           password: ${{ secrets.HUB_TOKEN }}
 
-      - name: Publish successor
+      - name: Publish
         run: |
-          docker buildx imagetools create \
-            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:successor \
-            ghcr.io/its-me/workflow:successor
-
-      - name: Tag semver
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          docker buildx imagetools create \
-            --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:successor-${GITHUB_REF_NAME#v} \
-            ghcr.io/its-me/workflow:successor
+          for tag in ${{ needs.build-successor.outputs.tags }}; do
+            docker buildx imagetools create \
+              --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:$tag \
+              ghcr.io/its-me/workflow:$tag
+          done
 
   push-successor-quay:
     name: "Quay: Publish successor"
@@ -209,19 +215,12 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
-      - name: Publish successor
+      - name: Publish
         env:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
-          docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:successor \
-            ghcr.io/its-me/workflow:successor
-
-      - name: Tag semver
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
-        run: |
-          docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:successor-${GITHUB_REF_NAME#v} \
-            ghcr.io/its-me/workflow:successor
+          for tag in ${{ needs.build-successor.outputs.tags }}; do
+            docker buildx imagetools create \
+              --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:$tag \
+              ghcr.io/its-me/workflow:$tag
+          done
