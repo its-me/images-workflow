@@ -1,13 +1,21 @@
-# image-workflow
+# Image Workflow
 
-Minimal busybox-based template image for GitHub Actions workflow experiments.
+Template repository demonstrating a multi-arch Docker image CI/CD workflow with GitHub Actions.
+
+## Workflow
+
+- Builds on every push, pull request, and daily schedule
+- Deploys to all registries on `main` branch and `v*` tag pushes; build-only on other branches and PRs
+- Supports 8 platforms: `linux/amd64`, `linux/arm64`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`, `linux/riscv64`
 
 ## Images
 
 | Tag | Description |
 |---|---|
 | `base` | Minimal image built from busybox |
+| `base-X.Y.Z` | Versioned base image |
 | `successor` | Extends base, demonstrating image inheritance |
+| `successor-X.Y.Z` | Versioned successor image |
 
 ## Registries
 

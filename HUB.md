@@ -1,15 +1,23 @@
-<!-- Minimal busybox-based template image for GitHub Actions workflow experiments -->
+<!-- Multi-arch Docker image CI/CD workflow template using GitHub Actions -->
 
-# workflow
+# Image Workflow
 
-Minimal busybox-based template image for GitHub Actions workflow experiments.
+Template repository demonstrating a multi-arch Docker image CI/CD workflow with GitHub Actions.
+
+Source: [github.com/its-me/image-workflow](https://github.com/its-me/image-workflow)
 
 ## Images
 
 | Tag | Description |
 |---|---|
 | `base` | Minimal image built from busybox |
+| `base-X.Y.Z` | Versioned base image |
 | `successor` | Extends base, demonstrating image inheritance |
+| `successor-X.Y.Z` | Versioned successor image |
+
+## Platforms
+
+`linux/amd64` · `linux/arm64` · `linux/arm/v7` · `linux/arm/v6` · `linux/386` · `linux/ppc64le` · `linux/s390x` · `linux/riscv64`
 
 ## Registries
 
