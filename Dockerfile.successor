@@ -2,3 +2,4 @@ FROM ghcr.io/its-me/workflow:base
 
 ARG COMMIT_SHA
 LABEL org.opencontainers.image.revision=$COMMIT_SHA
+LABEL org.opencontainers.image.source=https://github.com/its-me/image-workflow
