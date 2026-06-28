@@ -8,6 +8,8 @@ on:
       - README.md
       - LICENSE
   pull_request:
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 env:
