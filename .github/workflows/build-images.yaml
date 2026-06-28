@@ -76,8 +76,8 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  merge-base:
-    name: Store base in GHCR
+  assemble-base:
+    name: Assemble base in GHCR
     needs: build-base
     runs-on: ubuntu-latest
     environment:
@@ -124,7 +124,7 @@ jobs:
 
   push-base-hub:
     name: Deploy base to Docker Hub
-    needs: merge-base
+    needs: assemble-base
     runs-on: ubuntu-slim
     environment:
       name: Docker Hub
@@ -147,7 +147,7 @@ jobs:
 
       - name: Deploy
         run: |
-          for tag in ${{ needs.merge-base.outputs.tags }}; do
+          for tag in ${{ needs.assemble-base.outputs.tags }}; do
             docker buildx imagetools create \
               --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:$tag \
               ghcr.io/its-me/$REPOSITORY:$tag
@@ -155,7 +155,7 @@ jobs:
 
   push-base-quay:
     name: Deploy base to Quay.io
-    needs: merge-base
+    needs: assemble-base
     runs-on: ubuntu-slim
     environment:
       name: Quay.io
@@ -181,7 +181,7 @@ jobs:
         env:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
-          for tag in ${{ needs.merge-base.outputs.tags }}; do
+          for tag in ${{ needs.assemble-base.outputs.tags }}; do
             docker buildx imagetools create \
               --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:$tag \
               ghcr.io/its-me/$REPOSITORY:$tag
@@ -189,7 +189,7 @@ jobs:
 
   build-successor:
     name: Build successor (${{ matrix.platform }})
-    needs: merge-base
+    needs: assemble-base
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -251,8 +251,8 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  merge-successor:
-    name: Store successor in GHCR
+  assemble-successor:
+    name: Assemble successor in GHCR
     needs: build-successor
     runs-on: ubuntu-latest
     environment:
@@ -299,7 +299,7 @@ jobs:
 
   push-successor-hub:
     name: Deploy successor to Docker Hub
-    needs: merge-successor
+    needs: assemble-successor
     runs-on: ubuntu-slim
     environment:
       name: Docker Hub
@@ -322,7 +322,7 @@ jobs:
 
       - name: Deploy
         run: |
-          for tag in ${{ needs.merge-successor.outputs.tags }}; do
+          for tag in ${{ needs.assemble-successor.outputs.tags }}; do
             docker buildx imagetools create \
               --tag ${{ secrets.HUB_USERNAME }}/$REPOSITORY:$tag \
               ghcr.io/its-me/$REPOSITORY:$tag
@@ -330,7 +330,7 @@ jobs:
 
   push-successor-quay:
     name: Deploy successor to Quay.io
-    needs: merge-successor
+    needs: assemble-successor
     runs-on: ubuntu-slim
     environment:
       name: Quay.io
@@ -356,7 +356,7 @@ jobs:
         env:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
-          for tag in ${{ needs.merge-successor.outputs.tags }}; do
+          for tag in ${{ needs.assemble-successor.outputs.tags }}; do
             docker buildx imagetools create \
               --tag quay.io/${QUAY_NAMESPACE%%+*}/$REPOSITORY:$tag \
               ghcr.io/its-me/$REPOSITORY:$tag
