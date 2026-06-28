@@ -52,10 +52,10 @@ jobs:
       - name: Update description
         env:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
-          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+          QUAY_API_TOKEN: ${{ secrets.QUAY_API_TOKEN }}
         run: |
           curl -fsSL -X PUT "https://quay.io/api/v1/repository/${QUAY_NAMESPACE%%+*}/$REPOSITORY" \
-            -H "Authorization: Bearer $QUAY_TOKEN" \
+            -H "Authorization: Bearer $QUAY_API_TOKEN" \
             -H "Content-Type: application/json" \
             -H "X-Requested-With: XMLHttpRequest" \
             --data-binary "$(jq -n \
