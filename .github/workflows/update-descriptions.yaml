@@ -3,9 +3,9 @@ name: Update descriptions
 on:
   push:
     branches: [main]
-    # paths:
-    #   - hub.md
-    #   - quay.md
+    paths:
+      - HUB.md
+      - QUAY.md
   workflow_dispatch:
 
 env:

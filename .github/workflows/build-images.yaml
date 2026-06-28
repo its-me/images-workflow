@@ -2,6 +2,9 @@ name: Build images
 
 on:
   push:
+    paths-ignore:
+      - HUB.md
+      - QUAY.md
   workflow_dispatch:
 
 env:
