@@ -7,6 +7,7 @@ on:
       - QUAY.md
       - README.md
       - LICENSE
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -54,14 +55,16 @@ jobs:
           file: Dockerfile.base
           platforms: ${{ matrix.platform }}
           build-args: COMMIT_SHA=${{ github.sha }}
-          outputs: type=image,name=ghcr.io/its-me/${{ env.REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
+          outputs: ${{ github.ref == 'refs/heads/main' && format('type=image,name=ghcr.io/its-me/{0},push-by-digest=true,name-canonical=true,push=true', env.REPOSITORY) || 'type=cacheonly' }}
 
       - name: Prepare
+        if: github.ref == 'refs/heads/main'
         run: |
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Export digest
+        if: github.ref == 'refs/heads/main'
         run: |
           mkdir -p /tmp/digests
           touch "/tmp/digests/${DIGEST#sha256:}"
@@ -69,6 +72,7 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
 
       - name: Upload digest
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v7
         with:
           name: base-digest-${{ env.PLATFORM_PAIR }}
@@ -78,6 +82,7 @@ jobs:
 
   assemble-base:
     name: Assemble base in GHCR
+    if: github.ref == 'refs/heads/main'
     needs: build-base
     runs-on: ubuntu-latest
     environment:
@@ -189,6 +194,7 @@ jobs:
 
   build-successor:
     name: Build successor (${{ matrix.platform }})
+    if: always() && (needs.assemble-base.result == 'success' || needs.assemble-base.result == 'skipped')
     needs: assemble-base
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -229,14 +235,16 @@ jobs:
           file: Dockerfile.successor
           platforms: ${{ matrix.platform }}
           build-args: COMMIT_SHA=${{ github.sha }}
-          outputs: type=image,name=ghcr.io/its-me/${{ env.REPOSITORY }},push-by-digest=true,name-canonical=true,push=true
+          outputs: ${{ github.ref == 'refs/heads/main' && format('type=image,name=ghcr.io/its-me/{0},push-by-digest=true,name-canonical=true,push=true', env.REPOSITORY) || 'type=cacheonly' }}
 
       - name: Prepare
+        if: github.ref == 'refs/heads/main'
         run: |
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Export digest
+        if: github.ref == 'refs/heads/main'
         run: |
           mkdir -p /tmp/digests
           touch "/tmp/digests/${DIGEST#sha256:}"
@@ -244,6 +252,7 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
 
       - name: Upload digest
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v7
         with:
           name: successor-digest-${{ env.PLATFORM_PAIR }}
@@ -253,6 +262,7 @@ jobs:
 
   assemble-successor:
     name: Assemble successor in GHCR
+    if: github.ref == 'refs/heads/main'
     needs: build-successor
     runs-on: ubuntu-latest
     environment:
