@@ -79,7 +79,7 @@ jobs:
   merge-base:
     name: Store base in GHCR
     needs: build-base
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     environment:
       name: GHCR
       url: https://ghcr.io/its-me/workflow
@@ -254,7 +254,7 @@ jobs:
   merge-successor:
     name: Store successor in GHCR
     needs: build-successor
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     environment:
       name: GHCR
       url: https://ghcr.io/its-me/workflow
