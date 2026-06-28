@@ -22,15 +22,10 @@ jobs:
           HUB_USERNAME: ${{ secrets.HUB_USERNAME }}
           HUB_PASSWORD: ${{ secrets.HUB_PASSWORD }}
         run: |
-          set -o pipefail
           token=$(curl -fsSL -X POST "https://hub.docker.com/v2/users/login" \
             -H "Content-Type: application/json" \
             -d "{\"username\":\"$HUB_USERNAME\",\"password\":\"$HUB_PASSWORD\"}" \
             | jq -r '.token')
-          if [ -z "$token" ] || [ "$token" = "null" ]; then
-            echo "Login failed: token is empty or null"
-            exit 1
-          fi
           short_description=$(sed -n '1s/^<!-- \(.*\) -->$/\1/p' HUB.md)
           full_description=$(tail -n +2 HUB.md)
           curl -fsSL -X PATCH "https://hub.docker.com/v2/repositories/$HUB_USERNAME/$REPOSITORY/" \
