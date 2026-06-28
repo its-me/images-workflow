@@ -5,6 +5,8 @@ on:
     paths-ignore:
       - HUB.md
       - QUAY.md
+      - README.md
+      - LICENSE
   workflow_dispatch:
 
 env:
